@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import Backend from "../services/Backend";
+import Backend from "../services/backend";
 
 export interface SubscriptionPlan {
     id: string;
