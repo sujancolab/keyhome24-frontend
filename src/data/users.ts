@@ -1,0 +1,28 @@
+export const realUsers = {
+    admin: {
+        id: "admin",
+        email: "admin@immofrance.fr",
+        password: "Admin2024!",
+        name: "Jean Dupont",
+        role: "Administrateur",
+        department: "Direction",
+        verified: true,
+        createdAt: "2024-01-01T00:00:00.000Z",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+        phone: "+33 1 23 45 67 89",
+        location: "Paris, France",
+    } /*,
+    "b7eddcce-61ba-473f-8d8c-432fce55b69f": {
+        id: "b7eddcce-61ba-473f-8d8c-432fce55b69f",
+        email: "zdzdzdzd@zdzdzdzd.zdzdzdzd",
+        password: "zdzdzdzd417",
+        name: "zdzdzdzd",
+        role: "Utilisateur",
+        department: "Direction",
+        verified: true,
+        createdAt: "2024-11-15T00:17:09.295Z",
+        avatar: "https://ui-avatars.com/api/?name=zdzdzdzd&background=random",
+        phone: "07844848458",
+        location: "Jojoj",
+    },*/,
+};
