@@ -78,7 +78,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
     const uniqueRooms = Array.from(
         new Set(
-            !isLoading &&
+            !isLoading && data && data.length > 0 &&
                 data
                     .filter((p) => p.transactionType === searchType)
                     .map((p) => p.rooms)

@@ -20,12 +20,12 @@ export const Footer = () => {
                             <Home className="h-6 sm:h-8 w-6 sm:w-8 text-red-500" />
                             <span className="ml-2 text-lg sm:text-xl font-bold">
                                 {!configurationIsLoading &&
-                                    configurationData.name}
+                                    configurationData?.name}
                             </span>
                         </Link>
                         <p className="text-sm sm:text-base text-gray-400">
                             {!configurationIsLoading &&
-                                configurationData.description}
+                                configurationData?.description}
                         </p>
                     </div>
 
@@ -37,8 +37,8 @@ export const Footer = () => {
                             <a
                                 href={
                                     !configurationIsLoading &&
-                                    configurationData.email
-                                        ? `mailto:${configurationData.email}`
+                                    configurationData?.email
+                                        ? `mailto:${configurationData?.email}`
                                         : "#"
                                 }
                                 className="flex items-center text-sm sm:text-base hover:text-red-500"
@@ -46,7 +46,7 @@ export const Footer = () => {
                                 <Mail className="h-5 w-5 mr-2 text-red-500" />
                                 <span>
                                     {!configurationIsLoading &&
-                                        configurationData.email}
+                                        configurationData?.email}
                                 </span>
                             </a>
                         </div>
@@ -118,7 +118,7 @@ export const Footer = () => {
                 <div className="border-t border-dark-800 mt-8 pt-8 text-center">
                     <p className="text-sm text-gray-400">
                         &copy; 2024{" "}
-                        {!configurationIsLoading && configurationData.name}.
+                        {!configurationIsLoading && configurationData?.name}.
                         Tous droits réservés.
                     </p>
                 </div>

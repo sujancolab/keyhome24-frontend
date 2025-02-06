@@ -48,7 +48,7 @@ export const Navbar = () => {
                             <Home className="h-6 sm:h-8 w-6 sm:w-8 text-red-500" />
                             <span className="ml-2 text-lg sm:text-xl font-bold text-white">
                                 {!configurationIsLoading &&
-                                    configurationData.name}
+                                    configurationData?.name}
                             </span>
                         </Link>
 
