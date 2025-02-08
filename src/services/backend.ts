@@ -1,7 +1,7 @@
 class Backend {
     private static baseUrl: string =
         window.location.hostname === "localhost"
-            ? "http://localhost:8080/api/v1"
+            ? "http://localhost:8081/api/v1"
             : "https://137.184.83.246/api/v1";//"https://api.keyhome24.com/api/v1";
 
     private static async fetchHandler(endpoint: string, options: RequestInit) {

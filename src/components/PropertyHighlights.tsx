@@ -10,6 +10,7 @@ const PropertyHighlights = () => {
         queryKey: ["repoData"],
         queryFn: () => Backend.get("/annonces"),
     });
+    console.log("data", data);
 
     if (isLoading) {
         return (
