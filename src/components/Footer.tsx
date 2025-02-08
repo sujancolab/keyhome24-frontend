@@ -19,13 +19,11 @@ export const Footer = () => {
                         <Link to="/" className="flex items-center mb-4">
                             <Home className="h-6 sm:h-8 w-6 sm:w-8 text-red-500" />
                             <span className="ml-2 text-lg sm:text-xl font-bold">
-                                {!configurationIsLoading &&
-                                    configurationData?.name || ''}
+                                {!configurationIsLoading && configurationData?.name || ''}
                             </span>
                         </Link>
                         <p className="text-sm sm:text-base text-gray-400">
-                            {!configurationIsLoading &&
-                                configurationData?.description || ''}
+                            {!configurationIsLoading && configurationData?.description || ''}
                         </p>
                     </div>
 
@@ -36,17 +34,13 @@ export const Footer = () => {
                         <div className="space-y-2">
                             <a
                                 href={
-                                    !configurationIsLoading &&
-                                    configurationData?.email
-                                        ? `mailto:${configurationData?.email}`
-                                        : "#"
+                                    !configurationIsLoading && configurationData?.email ? `mailto:${configurationData?.email}` : "#"
                                 }
                                 className="flex items-center text-sm sm:text-base hover:text-red-500"
                             >
                                 <Mail className="h-5 w-5 mr-2 text-red-500" />
                                 <span>
-                                    {!configurationIsLoading &&
-                                        configurationData?.email || ''}
+                                    {!configurationIsLoading && configurationData?.email || ''}
                                 </span>
                             </a>
                         </div>
