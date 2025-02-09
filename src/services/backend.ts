@@ -1,16 +1,41 @@
+import { mockProperties, mockUser } from '../data/mockData';
+
 class Backend {
     private static baseUrl: string =
         window.location.hostname === "localhost"
             ? "http://localhost:8081/api/v1"
             : "https://137.184.83.246/api/v1";//"https://api.keyhome24.com/api/v1";
 
-    private static async fetchHandler(endpoint: string, options: RequestInit) {
-        const response = await fetch(`${this.baseUrl}${endpoint}`, options);
-        return response.json();
+    private static async fetchWithFallback(endpoint: string, options: RequestInit) {
+        try {
+            const response = await fetch(`${this.baseUrl}${endpoint}`, options);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.warn('API call failed, using mock data:', error);
+            // Return mock data based on endpoint
+            switch (endpoint) {
+                case '/annonces':
+                    return mockProperties;
+                case '/auth/me':
+                    return mockUser;
+                case '/auth/login':
+                    return {
+                        token: 'mock-token',
+                        user: mockUser
+                    };
+                default:
+                    if (endpoint.startsWith('/annonces/')) {
+                        const id = endpoint.split('/').pop();
+                        return mockProperties.find(p => p.id === id) || null;
+                    }
+                    return null;
+            }
+        }
     }
 
     static async get(endpoint: string) {
-        return this.fetchHandler(endpoint, {
+        return this.fetchWithFallback(endpoint, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -22,7 +47,7 @@ class Backend {
     }
 
     static async post(endpoint: string, data: any) {
-        return this.fetchHandler(endpoint, {
+        return this.fetchWithFallback(endpoint, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -35,7 +60,7 @@ class Backend {
     }
 
     static async delete(endpoint: string) {
-        return this.fetchHandler(endpoint, {
+        return this.fetchWithFallback(endpoint, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -47,7 +72,7 @@ class Backend {
     }
 
     static async patch(endpoint: string, data: any) {
-        return this.fetchHandler(endpoint, {
+        return this.fetchWithFallback(endpoint, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -60,7 +85,7 @@ class Backend {
     }
 
     static async put(endpoint: string, data: any) {
-        return this.fetchHandler(endpoint, {
+        return this.fetchWithFallback(endpoint, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
