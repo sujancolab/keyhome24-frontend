@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import {
     BrowserRouter as Router,
     Routes,
@@ -27,57 +27,63 @@ import CancelPaymentPage from "./pages/CancelPaymentPage";
 const App: React.FC = () => {
     return (
         <Router>
-            <Routes>
-                {/* Routes publiques */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/search" element={<PropertiesPage />} />
-                <Route path="/properties" element={<PropertiesPage />} />
-                <Route path="/requests" element={<RequestsPage />} />
-                <Route path="/property/:id" element={<PropertyDetailPage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/verify-email" element={<VerifyEmailPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/imprint" element={<ImprintPage />} />
-                <Route path="/auth/reset-password/:id" element={<ResetPassword />}/>
-                <Route
-                    path="/success/:sessionId"
-                    element={<SuccessPaymentPage />}
-                />
-                <Route path="/cancel" element={<CancelPaymentPage />} />
+            <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+                </div>
+            }>
+                <Routes>
+                    {/* Routes publiques */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/search" element={<PropertiesPage />} />
+                    <Route path="/properties" element={<PropertiesPage />} />
+                    <Route path="/requests" element={<RequestsPage />} />
+                    <Route path="/property/:id" element={<PropertyDetailPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/imprint" element={<ImprintPage />} />
+                    <Route path="/auth/reset-password/:id" element={<ResetPassword />}/>
+                    <Route
+                        path="/success/:sessionId"
+                        element={<SuccessPaymentPage />}
+                    />
+                    <Route path="/cancel" element={<CancelPaymentPage />} />
 
-                {/* Routes protégées utilisateur */}
-                <Route
-                    path="/dashboard/*"
-                    element={
-                        <PrivateRoute>
-                            <DashboardPage />
-                        </PrivateRoute>
-                    }
-                />
+                    {/* Routes protégées utilisateur */}
+                    <Route
+                        path="/dashboard/*"
+                        element={
+                            <PrivateRoute>
+                                <DashboardPage />
+                            </PrivateRoute>
+                        }
+                    />
 
-                {/* Routes protégées admin */}
-                <Route
-                    path="/admin/*"
-                    element={
-                        <PrivateRoute requireAdmin={true}>
-                            <AdminDashboard />
-                        </PrivateRoute>
-                    }
-                />
+                    {/* Routes protégées admin */}
+                    <Route
+                        path="/admin/*"
+                        element={
+                            <PrivateRoute requireAdmin={true}>
+                                <AdminDashboard />
+                            </PrivateRoute>
+                        }
+                    />
 
-                {/*<Route 
-          path="/settings" 
-          element={
-            <PrivateRoute>
-              <SettingsPage />
-            </PrivateRoute>
-          }
-        />*/}
+                    {/*<Route 
+              path="/settings" 
+              element={
+                <PrivateRoute>
+                  <SettingsPage />
+                </PrivateRoute>
+              }
+            />*/}
 
-                {/* Redirection par défaut */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                    {/* Redirection par défaut */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </Suspense>
         </Router>
     );
 };
