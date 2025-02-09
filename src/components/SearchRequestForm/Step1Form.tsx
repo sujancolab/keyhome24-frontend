@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { SearchRequestData } from '../../types/searchRequest';
 import { LocationForm, ColocationForm, RepriseForm } from './forms';
 import { ArrowRight } from 'lucide-react';
@@ -9,29 +9,43 @@ interface Step1FormProps {
   initialData: SearchRequestData;
 }
 
-export const Step1Form: React.FC<Step1FormProps> = ({ onSubmit, initialData }) => {
-  const { register, handleSubmit, watch, formState: { errors, isValid } } = useForm({
-    defaultValues: initialData,
-    mode: 'onChange'
-  });
+const Step1Form: React.FC<Step1FormProps> = ({ onSubmit }) => {
+  const { register, handleSubmit, watch, formState: { errors, isValid } } = useFormContext<SearchRequestData>();
 
   const selectedType = watch('type');
+
+  // Validation du code postal suisse
+  const validatePostalCode = (value: string) => {
+    const postalCodeRegex = /^[1-9]\d{3}$/;
+    if (!postalCodeRegex.test(value)) {
+      return "Le code postal doit contenir exactement 4 chiffres et ne peut pas commencer par 0";
+    }
+    return true;
+  };
+
+  // Validation du budget minimum
+  const validateBudget = (value: number) => {
+    if (value < 100) {
+      return "Le budget minimum est de 100 CHF";
+    }
+    return true;
+  };
 
   const getForm = () => {
     switch (selectedType) {
       case 'location':
-        return <LocationForm register={register} errors={errors} />;
+        return <LocationForm register={register} errors={errors} validatePostalCode={validatePostalCode} validateBudget={validateBudget} />;
       case 'colocation':
-        return <ColocationForm register={register} errors={errors} />;
+        return <ColocationForm register={register} errors={errors} validatePostalCode={validatePostalCode} validateBudget={validateBudget} />;
       case 'reprise':
-        return <RepriseForm register={register} errors={errors} />;
+        return <RepriseForm register={register} errors={errors} validatePostalCode={validatePostalCode} validateBudget={validateBudget} />;
       default:
         return null;
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="space-y-6">
       <div className="form-section">
         <h2 className="text-xl font-semibold mb-6">Type de recherche</h2>
         
@@ -64,7 +78,8 @@ export const Step1Form: React.FC<Step1FormProps> = ({ onSubmit, initialData }) =
 
       <div className="flex justify-end">
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit(onSubmit)}
           className={`px-8 py-3 rounded-lg transition-colors flex items-center ${
             isValid
               ? 'bg-red-600 text-white hover:bg-red-700'
@@ -76,7 +91,7 @@ export const Step1Form: React.FC<Step1FormProps> = ({ onSubmit, initialData }) =
           <ArrowRight className="ml-2 h-5 w-5" />
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

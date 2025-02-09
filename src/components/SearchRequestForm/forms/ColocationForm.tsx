@@ -3,7 +3,6 @@ import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { SearchRequestData } from '../../../types/searchRequest';
 import { MapPin, Building2, BedDouble, Users, Calendar } from 'lucide-react';
 import ChfIcon from '../../ChfIcon';
-import { cantons } from '../../../data/cantons';
 
 interface ColocationFormProps {
   register: UseFormRegister<SearchRequestData>;
@@ -31,25 +30,7 @@ const ColocationForm: React.FC<ColocationFormProps> = ({ register, errors }) => 
       {/* Localisation */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-gray-700">Localisation *</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Canton *</label>
-            <div className="input-group">
-              <select
-                {...register('location.canton', { required: "Le canton est requis" })}
-                className="form-select input-with-icon"
-              >
-                <option value="">Sélectionnez</option>
-                {cantons.map(canton => (
-                  <option key={canton.code} value={canton.code}>
-                    {canton.name}
-                  </option>
-                ))}
-              </select>
-              <MapPin className="input-icon" />
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-600 mb-1">NPA *</label>
             <input
@@ -64,6 +45,9 @@ const ColocationForm: React.FC<ColocationFormProps> = ({ register, errors }) => 
               className="form-input"
               placeholder="1000"
             />
+            {errors.location?.npa && (
+              <p className="form-error">{errors.location.npa.message}</p>
+            )}
           </div>
 
           <div>
@@ -74,6 +58,9 @@ const ColocationForm: React.FC<ColocationFormProps> = ({ register, errors }) => 
               className="form-input"
               placeholder="Lausanne"
             />
+            {errors.location?.city && (
+              <p className="form-error">{errors.location.city.message}</p>
+            )}
           </div>
         </div>
       </div>
@@ -154,6 +141,82 @@ const ColocationForm: React.FC<ColocationFormProps> = ({ register, errors }) => 
           placeholder="Décrivez votre profil, vos attentes, votre mode de vie..."
         />
         {errors.description && <p className="form-error">{errors.description.message}</p>}
+      </div>
+
+      {/* Contact */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-700">Informations de contact *</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Nom complet *</label>
+            <input
+              type="text"
+              {...register('contact.name', { required: "Le nom est requis" })}
+              className="form-input"
+              placeholder="Jean Dupont"
+            />
+            {errors.contact?.name && (
+              <p className="form-error">{errors.contact.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Email *</label>
+            <input
+              type="email"
+              {...register('contact.email', { 
+                required: "L'email est requis",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Adresse email invalide"
+                }
+              })}
+              className="form-input"
+              placeholder="jean.dupont@example.com"
+            />
+            {errors.contact?.email && (
+              <p className="form-error">{errors.contact.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Téléphone *</label>
+            <input
+              type="tel"
+              {...register('contact.phone', { 
+                required: "Le téléphone est requis",
+                pattern: {
+                  value: /^\+?[0-9\s-]{10,}$/,
+                  message: "Numéro de téléphone invalide"
+                }
+              })}
+              className="form-input"
+              placeholder="+41 XX XXX XX XX"
+            />
+            {errors.contact?.phone && (
+              <p className="form-error">{errors.contact.phone.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Conditions générales */}
+      <div className="form-group">
+        <label className="flex items-start space-x-3">
+          <input
+            type="checkbox"
+            {...register('termsAccepted', { 
+              required: "Vous devez accepter les conditions générales" 
+            })}
+            className="mt-1 form-checkbox"
+          />
+          <span className="text-sm text-gray-600">
+            J'accepte les conditions générales et la politique de confidentialité *
+          </span>
+        </label>
+        {errors.termsAccepted && (
+          <p className="form-error">{errors.termsAccepted.message}</p>
+        )}
       </div>
     </div>
   );

@@ -1,33 +1,32 @@
-import React from "react";
-import { Train, School, ShoppingBag, Coffee } from "lucide-react";
+import React from 'react';
+import { Train, School, ShoppingBag, Coffee } from 'lucide-react';
 
 interface LocationInfoProps {
-    location: {
-        address: string;
-        city: string;
-        npa: string;
-    };
-    proximity: {
-        transport: string[];
-        education: string[];
-        shopping: string[];
-        leisure: string[];
-    };
+  location: {
+    address: string;
+    city: string;
+    npa: string;
+  };
+  proximity: {
+    transport: string[];
+    education: string[];
+    shopping: string[];
+    leisure: string[];
+  };
 }
 
 const LocationInfo: React.FC<LocationInfoProps> = ({ location, proximity }) => {
-    return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Adresse</h3>
-                <p className="text-gray-700">
-                    {location && location.address}
-                    <br />
-                    {location && location.npa} {location && location.city}
-                </p>
-            </div>
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h3 className="text-lg font-semibold mb-4">Adresse</h3>
+        <p className="text-gray-700">
+          {location.address}<br />
+          {location.npa} {location.city}
+        </p>
+      </div>
 
-            {/*<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {proximity.transport?.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -95,9 +94,9 @@ const LocationInfo: React.FC<LocationInfoProps> = ({ location, proximity }) => {
             </ul>
           </div>
         )}
-      </div>*/}
-        </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default LocationInfo;

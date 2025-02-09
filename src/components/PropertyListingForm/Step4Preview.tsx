@@ -1,175 +1,196 @@
-import React from "react";
-import { useFormContext } from "react-hook-form";
-import {
-    ArrowLeft,
-    ArrowRight,
-    MapPin,
-    Calendar,
-    Home,
-    Maximize,
-    Bath,
-    Building2,
-} from "lucide-react";
-import { PropertyFormData, propertyTypes } from "../../types/propertyListing";
-import ChfIcon from "../ChfIcon";
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { MapPin, Calendar, Home, Maximize, Bath, Building2, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PropertyFormData, propertyTypeLabels } from '../../types/propertyListing';
+import FormActions from '../common/FormActions';
 
 interface Step4PreviewProps {
-    onNext: () => void;
-    onBack: () => void;
+  onNext: () => void;
+  onBack: () => void;
 }
 
 const Step4Preview: React.FC<Step4PreviewProps> = ({ onNext, onBack }) => {
-    const { watch } = useFormContext<PropertyFormData>();
-    const data = watch();
+  const { watch } = useFormContext<PropertyFormData>();
+  const data = watch();
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
 
-    const propertyTypeLabel = data.propertyType
-        ? propertyTypes[data.propertyType].label
-        : "";
+  const nextImage = () => {
+    if (data.media?.images) {
+      setCurrentImageIndex(prev => 
+        prev === data.media.images.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
 
-    return (
-        <div className="space-y-6">
-            <div className="form-section">
-                <h2 className="text-xl font-semibold mb-6">
-                    Aperçu de votre annonce
-                </h2>
+  const prevImage = () => {
+    if (data.media?.images) {
+      setCurrentImageIndex(prev => 
+        prev === 0 ? data.media.images.length - 1 : prev - 1
+      );
+    }
+  };
 
-                {/* Images */}
-                {data.images && data.images.length > 0 && (
-                    <div className="mb-6">
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {data.images.map(
-                                (base64: string, index: number) => (
-                                    <div
-                                        key={index}
-                                        className="aspect-[4/3] rounded-lg overflow-hidden shadow-md"
-                                    >
-                                        <img
-                                            src={base64}
-                                            alt={`Aperçu ${index + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )
-                            )}
-                        </div>
-                    </div>
-                )}
+  const formatPrice = (price: number) => {
+    return `${price.toLocaleString('fr-CH')} CHF${data.type === 'rent' ? '/mois' : ''}`;
+  };
 
-                {/* Informations principales */}
-                <div className="space-y-6">
-                    <div>
-                        <h3 className="text-xl font-semibold text-gray-900">
-                            {data.title || propertyTypeLabel}
-                        </h3>
-                        <div className="flex items-center text-gray-600 mt-2">
-                            <MapPin className="h-5 w-5 mr-2 flex-shrink-0" />
-                            <span>
-                                {[
-                                    data.location.address,
-                                    data.location.postalCode,
-                                    data.location.city,
-                                    data.location.canton,
-                                ]
-                                    .filter(Boolean)
-                                    .join(", ")}
-                            </span>
-                        </div>
-                        <div className="flex items-center text-red-600 font-semibold mt-2 text-lg">
-                            <ChfIcon className="h-5 w-5 mr-2 flex-shrink-0" />
-                            <span>
-                                {data.price.toLocaleString("fr-CH")} CHF
-                            </span>
-                            {data.type === "rent" && (
-                                <span className="text-gray-600 font-normal">
-                                    /mois
-                                </span>
-                            )}
-                        </div>
-                    </div>
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-sm">
+        {/* Galerie d'images */}
+        {data.media?.images && data.media.images.length > 0 && (
+          <div className="relative h-[500px] mb-6">
+            <img
+              src={URL.createObjectURL(data.media.images[currentImageIndex])}
+              alt="Aperçu principal"
+              className="w-full h-full object-cover"
+            />
+            <button
+              onClick={prevImage}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+            <div className="absolute bottom-4 right-4 bg-white/80 px-3 py-1 rounded-full text-sm">
+              {currentImageIndex + 1} / {data.media.images.length}
+            </div>
+          </div>
+        )}
 
-                    {/* Caractéristiques principales */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-6 border-t border-b">
-                        {data.features.rooms && (
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <Home className="h-6 w-6 mx-auto mb-2 text-red-600" />
-                                <span className="block font-semibold">
-                                    {data.features.rooms}
-                                </span>
-                                <span className="block text-sm text-gray-600">
-                                    Pièces
-                                </span>
-                            </div>
-                        )}
-                        {data.features.area && (
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <Maximize className="h-6 w-6 mx-auto mb-2 text-red-600" />
-                                <span className="block font-semibold">
-                                    {data.features.area} m²
-                                </span>
-                                <span className="block text-sm text-gray-600">
-                                    Surface
-                                </span>
-                            </div>
-                        )}
-                        {data.features.bathrooms && (
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <Bath className="h-6 w-6 mx-auto mb-2 text-red-600" />
-                                <span className="block font-semibold">
-                                    {data.features.bathrooms}
-                                </span>
-                                <span className="block text-sm text-gray-600">
-                                    Salle(s) de bain
-                                </span>
-                            </div>
-                        )}
-                        {data.features.floor !== undefined && (
-                            <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                <Building2 className="h-6 w-6 mx-auto mb-2 text-red-600" />
-                                <span className="block font-semibold">
-                                    {data.features.floor}
-                                </span>
-                                <span className="block text-sm text-gray-600">
-                                    Étage
-                                </span>
-                            </div>
-                        )}
-                    </div>
+        <div className="p-6">
+          {/* En-tête avec titre, localisation et prix */}
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {propertyTypeLabels[data.propertyType]} {data.features.rooms} pièces, {data.features.area} m²
+              </h1>
+              <div className="flex items-center text-gray-600">
+                <MapPin className="h-5 w-5 mr-2" />
+                <span>
+                  {data.location.address}, {data.location.postalCode} {data.location.city}
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-900">
+                {formatPrice(data.price)}
+              </div>
+              <div className="text-sm text-gray-500">Prix brut</div>
+            </div>
+          </div>
 
-                    {/* Description */}
-                    {data.description && (
-                        <div className="space-y-3">
-                            <h4 className="font-medium text-gray-900">
-                                Description
-                            </h4>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="text-gray-700 whitespace-pre-wrap break-words">
-                                    {data.description}
-                                </p>
-                            </div>
-                        </div>
-                    )}
+          {/* Caractéristiques principales */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-6 border-t border-b">
+            {data.features.rooms > 0 && (
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Home className="h-6 w-6 mx-auto mb-2 text-red-600" />
+                <span className="block font-semibold">{data.features.rooms}</span>
+                <span className="block text-sm text-gray-600">Pièces</span>
+              </div>
+            )}
+            {data.features.area > 0 && (
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Maximize className="h-6 w-6 mx-auto mb-2 text-red-600" />
+                <span className="block font-semibold">{data.features.area} m²</span>
+                <span className="block text-sm text-gray-600">Surface</span>
+              </div>
+            )}
+            {data.features.bathrooms > 0 && (
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Bath className="h-6 w-6 mx-auto mb-2 text-red-600" />
+                <span className="block font-semibold">{data.features.bathrooms}</span>
+                <span className="block text-sm text-gray-600">Salle(s) de bain</span>
+              </div>
+            )}
+            {data.features.floor !== undefined && (
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Building2 className="h-6 w-6 mx-auto mb-2 text-red-600" />
+                <span className="block font-semibold">{data.features.floor}</span>
+                <span className="block text-sm text-gray-600">Étage</span>
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="py-6 border-b">
+            <h2 className="text-xl font-semibold mb-4">Description</h2>
+            <p className="text-gray-700 whitespace-pre-wrap">{data.description}</p>
+          </div>
+
+          {/* Équipements */}
+          <div className="py-6">
+            <h2 className="text-xl font-semibold mb-4">Équipements</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {data.features.parking && (
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
+                  <span className="text-gray-700">Place de parking</span>
                 </div>
+              )}
+              {data.features.balcony && (
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
+                  <span className="text-gray-700">Balcon/Terrasse</span>
+                </div>
+              )}
+              {data.features.elevator && (
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
+                  <span className="text-gray-700">Ascenseur</span>
+                </div>
+              )}
             </div>
+          </div>
 
-            {/* Actions */}
-            <div className="flex justify-between">
-                <button
-                    onClick={onBack}
-                    className="flex items-center text-gray-600 hover:text-gray-900"
-                >
-                    <ArrowLeft className="h-5 w-5 mr-2" />
-                    Modifier
-                </button>
-                <button
-                    onClick={onNext}
-                    className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center"
-                >
-                    Continuer
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                </button>
+          {/* Documents */}
+          {data.media?.documents && data.media.documents.length > 0 && (
+            <div className="py-6 border-t">
+              <h2 className="text-xl font-semibold mb-4">Documents disponibles</h2>
+              <div className="space-y-2">
+                {data.media.documents.map((file: File, index: number) => (
+                  <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-700">{file.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
+
+          {/* Disponibilité */}
+          {data.availability && (
+            <div className="py-6 border-t flex items-center text-gray-600">
+              <Calendar className="h-5 w-5 mr-2" />
+              <span>Disponible dès le {new Date(data.availability).toLocaleDateString('fr-CH')}</span>
+            </div>
+          )}
+
+          {/* Informations de l'agence */}
+          <div className="py-6 border-t">
+            <h2 className="text-xl font-semibold mb-4">Agence immobilière</h2>
+            <div className="space-y-2">
+              <p className="text-gray-700">{data.agencyInfo.name}</p>
+              <p className="text-gray-700">{data.agencyInfo.address}</p>
+              <p className="text-gray-700">{data.agencyInfo.location}</p>
+              <p className="text-gray-700">{data.agencyInfo.phone}</p>
+              <p className="text-gray-700">{data.agencyInfo.email}</p>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+
+      <FormActions
+        onBack={onBack}
+        onNext={onNext}
+        showNext={true}
+      />
+    </div>
+  );
 };
 
 export default Step4Preview;

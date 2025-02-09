@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Euro, Building, BedDouble } from 'lucide-react';
+import { Users, Key, Search } from 'lucide-react';
 
 interface SearchHeaderProps {
   onSearch?: (filters: SearchFilters) => void;
@@ -37,11 +37,11 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onSearch }) => {
               className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-lg border-0 text-sm sm:text-base focus:ring-2 focus:ring-red-500 appearance-none shadow-md"
             >
               <option value="all">Tous les types</option>
-              <option value="location">Location</option>
               <option value="colocation">Colocation</option>
+              <option value="location">Location</option>
               <option value="reprise">Reprise de bail</option>
             </select>
-            <Building className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
+            <Users className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
           </div>
 
           <div className="relative">
@@ -52,7 +52,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onSearch }) => {
               onChange={(e) => handleFilterChange('location', e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-lg border-0 text-sm sm:text-base focus:ring-2 focus:ring-red-500 shadow-md"
             />
-            <MapPin className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
+            <Key className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
           </div>
 
           <div className="relative">
@@ -70,7 +70,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onSearch }) => {
               <option value="4000">Jusqu'à 4000 CHF</option>
               <option value="5000">Plus de 5000 CHF</option>
             </select>
-            <Euro className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
           </div>
 
           <div className="relative">
@@ -86,7 +86,7 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({ onSearch }) => {
               <option value="4-4.5">4 - 4.5</option>
               <option value="5+">5+</option>
             </select>
-            <BedDouble className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 sm:top-3 h-5 w-5 text-gray-400" />
           </div>
         </div>
       </div>

@@ -1,15 +1,18 @@
 import React from 'react';
-import { SearchRequestData } from '../../types/searchRequest';
+import { useFormContext } from 'react-hook-form';
 import { MapPin, Calendar, ArrowLeft, Check, Users, Key, Home } from 'lucide-react';
+import { SearchRequestData } from '../../types/searchRequest';
 import ChfIcon from '../ChfIcon';
 
 interface Step2PreviewProps {
-  data: SearchRequestData;
+  onNext: () => void;
   onBack: () => void;
-  onConfirm: () => void;
 }
 
-export const Step2Preview: React.FC<Step2PreviewProps> = ({ data, onBack, onConfirm }) => {
+const Step2Preview: React.FC<Step2PreviewProps> = ({ onNext, onBack }) => {
+  const { watch } = useFormContext<SearchRequestData>();
+  const data = watch();
+
   const TypeIcon = {
     location: Home,
     colocation: Users,
@@ -139,6 +142,7 @@ export const Step2Preview: React.FC<Step2PreviewProps> = ({ data, onBack, onConf
         </div>
       </div>
 
+      {/* Actions */}
       <div className="flex justify-between">
         <button
           onClick={onBack}
@@ -148,8 +152,8 @@ export const Step2Preview: React.FC<Step2PreviewProps> = ({ data, onBack, onConf
           Modifier
         </button>
         <button
-          onClick={onConfirm}
-          className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center"
+          onClick={onNext}
+          className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center"
         >
           <Check className="h-5 w-5 mr-2" />
           Continuer
@@ -158,3 +162,5 @@ export const Step2Preview: React.FC<Step2PreviewProps> = ({ data, onBack, onConf
     </div>
   );
 };
+
+export default Step2Preview;

@@ -1,183 +1,157 @@
-import React from "react";
-import { UserListing } from "../types";
-import StatsGrid from "./Stats/StatsGrid";
-import ActionsGrid from "./Actions/ActionsGrid";
-//import ActivityList from './Activity/ActivityList';
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import Backend from "../../../services/backend";
+import React from 'react';
+import { UserListing } from '../types';
+import { Upload, Search } from 'lucide-react';
 
 interface DashboardHomeProps {
-    listings: UserListing[];
-    onAddListing: () => void;
-    onAddRequest: () => void;
+  listings: UserListing[];
+  requests: any[];
+  onAddListing: () => void;
+  onAddRequest: () => void;
+  onDeleteListing: (id: string) => void;
 }
 
 const DashboardHome: React.FC<DashboardHomeProps> = ({
-    listings,
-    onAddListing,
-    onAddRequest,
+  listings,
+  requests,
+  onAddListing,
+  onAddRequest
 }) => {
-    const { isLoading, data } = useQuery({
-        queryKey: ["annonceUserData"],
-        queryFn: () => Backend.get("/annonces/@me"),
-    });
+  // Créer un tableau d'informations du compte avec des IDs uniques
+  const accountInfo = [
+    { id: 'account-name', label: 'Nom complet', value: 'Muster Keyhome24' },
+    { id: 'account-email', label: 'Email', value: 'muster@keyhome24.com' },
+    { id: 'account-phone', label: 'Téléphone', value: '+41••••••••••' },
+    { id: 'account-listings', label: 'Nombre d\'annonces actives', value: listings.length.toString() }
+  ];
 
-    return (
-        <div className="space-y-8">
-            <StatsGrid listings={listings} />
-            <ActionsGrid
-                onAddListing={onAddListing}
-                onAddRequest={onAddRequest}
-            />
-           
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div className="px-4 py-5 sm:px-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        Informations de votre Compte
-                    </h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                        Détails de votre compte et de vos annonces
-                    </p>
-                </div>
-                <div className="border-t border-gray-200">
-                    <dl>
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">
-                                Nom complet
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {
-                                    JSON.parse(
-                                        localStorage.getItem("currentUser") ||
-                                            "{}"
-                                    ).name
-                                }
-                            </dd>
-                        </div>
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">
-                                Email
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {
-                                    JSON.parse(
-                                        localStorage.getItem("currentUser") ||
-                                            "{}"
-                                    ).email
-                                }
-                            </dd>
-                        </div>
-                        <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">
-                                Numéro de téléphone
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {
-                                    JSON.parse(
-                                        localStorage.getItem("currentUser") ||
-                                            "{}"
-                                    ).phone
-                                }
-                            </dd>
-                        </div>
-                        <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt className="text-sm font-medium text-gray-500">
-                                Nombre d'annonces actives
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {(!isLoading && data && data.length) || 0}
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Titre
-                        </th>
-                        <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Type
-                        </th>
-                        <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Prix
-                        </th>
-                        <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Expiration
-                        </th>
-                        <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                            Statut
-                        </th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                    {!isLoading &&
-                        data &&
-                        data.length > 0 &&
-                        data.map((listing: any) => (
-                            <tr key={listing.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">
-                                        <Link
-                                            to={"/property/" + listing.id}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {listing.title}
-                                        </Link>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">
-                                        {listing.type}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">
-                                        {listing.price} CHF
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">
-                                        {new Date(
-                                            listing.expirationDate
-                                        ).toLocaleDateString("ch-CH")}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        className={
-                                            "px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-grey-100 text-grey-800"
-                                        }
-                                    >
-                                        {listing.status === "pending"
-                                            ? "Non payé"
-                                            : "Payé"}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                </tbody>
-            </table>
+  return (
+    <div className="space-y-8">
+      {/* Section Publier une annonce */}
+      <div className="bg-red-600 rounded-xl p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Publier une annonce</h2>
+            <p className="text-red-100 mb-6">
+              Créez une annonce attractive pour votre bien
+            </p>
+            <button
+              onClick={onAddListing}
+              className="bg-white text-red-600 px-6 py-3 rounded-lg hover:bg-red-50 transition-colors inline-flex items-center"
+            >
+              <Upload className="h-5 w-5 mr-2" />
+              Ajouter une annonce
+            </button>
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Section Publier une demande */}
+      <div className="bg-blue-600 rounded-xl p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Publier une demande</h2>
+            <p className="text-blue-100 mb-6">
+              Créez une demande pour trouver votre bien idéal
+            </p>
+            <button
+              onClick={onAddRequest}
+              className="bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors inline-flex items-center"
+            >
+              <Search className="h-5 w-5 mr-2" />
+              Publier une demande
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Informations du compte */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-6">Informations de votre Compte</h2>
+        <p className="text-gray-600 mb-6">Détails de votre compte et de vos annonces</p>
+        
+        <table className="w-full">
+          <tbody>
+            {accountInfo.map(info => (
+              <tr key={info.id} className={info.id !== 'account-listings' ? 'border-b' : ''}>
+                <td className="py-3 text-sm text-gray-600">{info.label}</td>
+                <td className="py-3 font-medium">{info.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Liste des annonces */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-6">Mes annonces</h2>
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">TITRE</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">TYPE</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">PRIX</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">EXPIRATION</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">STATUT</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {listings.map(listing => (
+              <tr key={`listing-${listing.id}`} className="hover:bg-gray-50">
+                <td className="py-4 px-4">{listing.title}</td>
+                <td className="py-4 px-4">residential</td>
+                <td className="py-4 px-4">{listing.price}</td>
+                <td className="py-4 px-4">08/12/2025</td>
+                <td className="py-4 px-4">
+                  <span className={`px-3 py-1 rounded-full text-sm ${
+                    listing.status === 'active' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {listing.status === 'active' ? 'Payé' : 'En attente'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Liste des demandes */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-6">Mes demandes</h2>
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">TITRE</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">TYPE</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">PRIX</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">EXPIRATION</th>
+              <th className="py-3 px-4 text-left text-sm font-medium text-gray-500">STATUT</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {requests.map(request => (
+              <tr key={`request-${request.id}`} className="hover:bg-gray-50">
+                <td className="py-4 px-4">{request.title}</td>
+                <td className="py-4 px-4">{request.type}</td>
+                <td className="py-4 px-4">{request.budget} CHF</td>
+                <td className="py-4 px-4">08/12/2025</td>
+                <td className="py-4 px-4">
+                  <span className={`px-3 py-1 rounded-full text-sm ${
+                    request.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {request.status === 'active' ? 'Payé' : 'En attente'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };
 
 export default DashboardHome;

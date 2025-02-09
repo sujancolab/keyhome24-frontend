@@ -19,7 +19,7 @@ interface Contact {
 
 interface SearchRequest {
   id: number;
-  type: 'location' | 'colocation' | 'reprise';
+  type: 'colocation' | 'location' | 'reprise';
   title: string;
   location: Location;
   budget: string;
@@ -40,24 +40,6 @@ interface SearchFilters {
 const initialSearchRequests: SearchRequest[] = [
   {
     id: 1,
-    type: 'location',
-    title: "Recherche 3.5 pièces à Bern",
-    location: {
-      canton: "Bern",
-      npa: "3011",
-      city: "Bern"
-    },
-    budget: "2000",
-    rooms: "3-3.5",
-    description: "Couple avec un enfant cherche appartement de 3.5 pièces, idéalement proche des transports publics. Disponibilité dès août 2024.",
-    date: "15.03.2024",
-    contact: {
-      phone: "+41 76 123 45 67",
-      email: "recherche@email.ch"
-    }
-  },
-  {
-    id: 2,
     type: 'colocation',
     title: "Colocation à Zürich",
     location: {
@@ -74,6 +56,24 @@ const initialSearchRequests: SearchRequest[] = [
       email: "coloc@email.ch"
     },
     image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
+  },
+  {
+    id: 2,
+    type: 'location',
+    title: "Recherche 3.5 pièces à Bern",
+    location: {
+      canton: "Bern",
+      npa: "3011",
+      city: "Bern"
+    },
+    budget: "2000",
+    rooms: "3-3.5",
+    description: "Couple avec un enfant cherche appartement de 3.5 pièces, idéalement proche des transports publics. Disponibilité dès août 2024.",
+    date: "15.03.2024",
+    contact: {
+      phone: "+41 76 123 45 67",
+      email: "recherche@email.ch"
+    }
   }
 ];
 
@@ -159,7 +159,7 @@ const SearchRequestsPage = () => {
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900">{request.title}</h3>
                         <p className="text-gray-600">
-                          {request.location.canton}, {request.location.npa} {request.location.city} - {request.budget} CHF/mois
+                          {request.location.city} • {request.budget} CHF/mois
                         </p>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm flex items-center gap-2 ${

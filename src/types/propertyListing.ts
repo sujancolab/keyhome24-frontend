@@ -1,107 +1,100 @@
-export type PropertyCategory =
-    | "residential"
-    | "commercial"
-    | "land"
-    | "parking";
+export type PropertyCategory = 'residential' | 'commercial' | 'land' | 'parking';
 
-export const propertyCategories: Record<PropertyCategory, string> = {
-    residential: "Résidentiel",
-    commercial: "Commercial",
-    land: "Terrain",
-    parking: "Parking",
-};
-
-export type PropertyType = {
-    id: string;
-    label: string;
-    category: PropertyCategory;
-};
-
-export const propertyTypes: Record<string, PropertyType> = {
-    // Résidentiel
-    apartment: {
-        id: "apartment",
-        label: "Appartement",
-        category: "residential",
-    },
-    house: { id: "house", label: "Maison", category: "residential" },
-    villa: { id: "villa", label: "Villa", category: "residential" },
-    chalet: { id: "chalet", label: "Chalet", category: "residential" },
-    loft: { id: "loft", label: "Loft", category: "residential" },
-    studio: { id: "studio", label: "Studio", category: "residential" },
-    duplex: { id: "duplex", label: "Duplex", category: "residential" },
-    penthouse: { id: "penthouse", label: "Penthouse", category: "residential" },
-
-    // Commercial
-    office: { id: "office", label: "Bureau", category: "commercial" },
-    shop: { id: "shop", label: "Commerce", category: "commercial" },
-    restaurant: {
-        id: "restaurant",
-        label: "Restaurant",
-        category: "commercial",
-    },
-    warehouse: { id: "warehouse", label: "Entrepôt", category: "commercial" },
-    industrial: {
-        id: "industrial",
-        label: "Local industriel",
-        category: "commercial",
-    },
-    hotel: { id: "hotel", label: "Hôtel", category: "commercial" },
-
-    // Terrain
-    buildingLand: {
-        id: "buildingLand",
-        label: "Terrain à bâtir",
-        category: "land",
-    },
-    agriculturalLand: {
-        id: "agriculturalLand",
-        label: "Terrain agricole",
-        category: "land",
-    },
-    industrialLand: {
-        id: "industrialLand",
-        label: "Terrain industriel",
-        category: "land",
-    },
-
-    // Parking
-    indoorParking: {
-        id: "indoorParking",
-        label: "Place intérieure",
-        category: "parking",
-    },
-    outdoorParking: {
-        id: "outdoorParking",
-        label: "Place extérieure",
-        category: "parking",
-    },
-    garage: { id: "garage", label: "Garage individuel", category: "parking" },
-    carport: { id: "carport", label: "Carport", category: "parking" },
-};
+export type PropertyType = 'apartment' | 'house' | 'villa' | 'studio' | 'loft' | 
+                         'office' | 'shop' | 'restaurant' | 'warehouse' |
+                         'buildingLand' | 'agriculturalLand' |
+                         'indoorParking' | 'outdoorParking' | 'garage';
 
 export interface PropertyFormData {
-    type: string;
-    category: string;
-    propertyType: string;
-    title: string;
-    description: string;
-    price: number;
-    location: {
-        address: string;
-        city: string;
-        postalCode: string;
-        canton: string;
-    };
-    features: {
-        area: number;
-        rooms: number;
-        bathrooms: number;
-        floor: number;
-        totalFloors: number;
-        parkingSpaces: number;
-    };
+  agencyInfo: {
+    name: string;
+    address: string;
+    location: string;
+    email: string;
+    phone: string;
+  };
+  type: 'sell' | 'rent';
+  category: PropertyCategory;
+  propertyType: PropertyType;
+  title: string;
+  description: string;
+  price: number;
+  location: {
+    address: string;
+    city: string;
+    postalCode: string;
+    canton: string;
+  };
+  features: {
+    area: number;
+    rooms: number;
+    bathrooms: number;
+    floor: number;
+    totalFloors: number;
+    parkingSpaces: number;
+    parking: boolean;
+    balcony: boolean;
+    elevator: boolean;
+    custom?: string[];
+  };
+  media: {
     images: File[];
-    subscriptionPlan: string;
-    paymentMethod: string;
+    documents: File[];
+  };
+  availability?: string;
 }
+
+export const propertyCategories = [
+  {
+    id: 'residential',
+    label: 'Résidentiel',
+    types: ['apartment', 'house', 'villa', 'studio', 'loft']
+  },
+  {
+    id: 'commercial',
+    label: 'Commercial',
+    types: ['office', 'shop', 'restaurant', 'warehouse']
+  },
+  {
+    id: 'land',
+    label: 'Terrain',
+    types: ['buildingLand', 'agriculturalLand']
+  },
+  {
+    id: 'parking',
+    label: 'Parking',
+    types: ['indoorParking', 'outdoorParking', 'garage']
+  }
+] as const;
+
+export const propertyTypeLabels: Record<PropertyType, string> = {
+  // Résidentiel
+  apartment: 'Appartement',
+  house: 'Maison',
+  villa: 'Villa',
+  studio: 'Studio',
+  loft: 'Loft',
+
+  // Commercial
+  office: 'Bureau',
+  shop: 'Commerce',
+  restaurant: 'Restaurant',
+  warehouse: 'Entrepôt',
+
+  // Terrain
+  buildingLand: 'Terrain à bâtir',
+  agriculturalLand: 'Terrain agricole',
+
+  // Parking
+  indoorParking: 'Place intérieure',
+  outdoorParking: 'Place extérieure',
+  garage: 'Garage'
+};
+
+export const propertyTypes = Object.entries(propertyTypeLabels).map(([id, label]) => ({
+  id,
+  label,
+  category: propertyCategories.find(cat => 
+    cat.types.includes(id as PropertyType)
+  )?.id as PropertyCategory
+}));

@@ -2,7 +2,7 @@ export const requests = [
   {
     id: "1",
     type: "location",
-    title: "Recherche 3.5 pièces à Lausanne",
+    title: "Demande de location - 3.5 pièces à Lausanne",
     location: {
       canton: "VD",
       npa: "1000",
@@ -23,7 +23,7 @@ export const requests = [
   {
     id: "2",
     type: "colocation",
-    title: "Chambre en colocation à Genève",
+    title: "Demande de colocation - Chambre à Genève",
     location: {
       canton: "GE",
       npa: "1201",
@@ -41,11 +41,10 @@ export const requests = [
     status: "active",
     createdAt: "2024-03-14"
   },
-  // Nouvelles demandes
   {
     id: "3",
     type: "reprise",
-    title: "Reprise de bail studio centre-ville",
+    title: "Offre de reprise de bail - Studio centre-ville",
     location: {
       canton: "VD",
       npa: "1003",
@@ -66,7 +65,7 @@ export const requests = [
   {
     id: "4",
     type: "colocation",
-    title: "Colocation quartier universitaire",
+    title: "Demande de colocation - Quartier universitaire",
     location: {
       canton: "GE",
       npa: "1205",

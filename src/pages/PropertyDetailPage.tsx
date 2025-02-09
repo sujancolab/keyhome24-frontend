@@ -1,13 +1,45 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import PropertyDetail from '../components/PropertyDetail/PropertyDetail';
 import { properties } from '../data/properties';
+import { ArrowLeft, Phone, Navigation, Share2 } from 'lucide-react';
 
 const PropertyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
   const property = properties.find(p => p.id === id);
+
+  const handleBack = () => {
+    if (location.key !== 'default') {
+      navigate(-1);
+    } else {
+      navigate('/properties' + location.search);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: property?.title,
+        text: `Découvrez ce bien immobilier : ${property?.title} à ${property?.location.city}`,
+        url: window.location.href
+      });
+    } catch (error) {
+      await navigator.clipboard.writeText(window.location.href);
+      alert('Lien copié dans le presse-papier !');
+    }
+  };
+
+  const handleDirection = () => {
+    if (property) {
+      const address = `${property.location.address}, ${property.location.npa} ${property.location.city}`;
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+      window.open(mapsUrl, '_blank');
+    }
+  };
 
   if (!property) {
     return (
@@ -25,6 +57,12 @@ const PropertyDetailPage: React.FC = () => {
       </div>
     );
   }
+
+  const priceString = typeof property.price === 'number' 
+    ? `${property.price.toLocaleString('fr-CH')} CHF` 
+    : property.price;
+
+  const isRental = property.transactionType === 'rent';
 
   const propertyData = {
     id: property.id,
@@ -71,45 +109,13 @@ const PropertyDetailPage: React.FC = () => {
         "Panneaux solaires"
       ]
     },
-    proximity: {
-      transport: [
-        "Bus à 2 minutes",
-        "Gare à 10 minutes",
-        "Autoroute à 5 minutes"
-      ],
-      education: [
-        "École primaire à 5 minutes",
-        "Collège à 10 minutes",
-        "Université à 15 minutes"
-      ],
-      shopping: [
-        "Supermarché à 3 minutes",
-        "Centre commercial à 10 minutes",
-        "Pharmacie à 2 minutes"
-      ],
-      leisure: [
-        "Parc public à 5 minutes",
-        "Salle de sport à 8 minutes",
-        "Restaurant à 2 minutes"
-      ]
-    },
-    agent: {
-      name: "Jean Dupont",
-      title: "Agent Immobilier Senior",
-      company: "ImmoFrance",
-      phone: "+41 21 123 45 67",
-      email: "jean.dupont@immofrance.ch",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a"
-    },
     documents: [
       {
-        name: "Plan de l'appartement",
-        type: "PDF",
+        title: "Plan de l'appartement",
         url: "#"
       },
       {
-        name: "Certificat énergétique",
-        type: "PDF",
+        title: "Certificat énergétique",
         url: "#"
       }
     ]
@@ -118,7 +124,69 @@ const PropertyDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+      
+      {/* En-tête fixe - Adapté pour mobile */}
+      <div className="sticky top-16 bg-white border-b shadow-sm z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {/* Bouton retour */}
+          <button
+            onClick={handleBack}
+            className="flex items-center text-gray-600 hover:text-gray-900 mb-2"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            <span className="text-sm sm:text-base">Retour aux résultats</span>
+          </button>
+          
+          {/* Contenu de l'en-tête */}
+          <div className="space-y-4">
+            {/* Titre et adresse */}
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 line-clamp-2">{property.title}</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">{property.location.address}, {property.location.npa} {property.location.city}</p>
+            </div>
+
+            {/* Prix, boutons de contact et actions */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* Prix */}
+              <div className="text-xl sm:text-2xl font-bold text-red-600">
+                {priceString}
+                {isRental && (
+                  <span className="block text-sm text-gray-500">CHF brut</span>
+                )}
+              </div>
+
+              {/* Boutons de contact et actions */}
+              <div className="flex w-full sm:w-auto gap-2 flex-wrap">
+                <a
+                  href="tel:+41XXXXXXXXX"
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-red-600 text-white text-sm sm:text-base rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <Phone className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Appeler</span>
+                </a>
+                <button
+                  onClick={handleDirection}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <Navigation className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Itinéraire</span>
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-gray-100 text-gray-700 text-sm sm:text-base rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <Share2 className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Partager</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenu principal */}
       <PropertyDetail property={propertyData} />
+      
       <Footer />
     </div>
   );

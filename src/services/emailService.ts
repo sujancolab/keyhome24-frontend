@@ -26,17 +26,17 @@ export const emailService = {
     // En production, envoyez un vrai email ici
     console.log(`
       À: ${email}
-      Sujet: Vérification de votre compte ImmoFrance
+      Sujet: Vérification de votre compte KeyHome24
       
       Bonjour ${name},
       
-      Bienvenue sur ImmoFrance ! Pour activer votre compte, veuillez cliquer sur le lien suivant :
+      Bienvenue sur KeyHome24 ! Pour activer votre compte, veuillez cliquer sur le lien suivant :
       
       ${window.location.origin}/verify-email?token=${token}
       
       Ce lien expirera dans 24 heures.
       
-      L'équipe ImmoFrance
+      L'équipe KeyHome24
     `);
 
     return token;
@@ -46,7 +46,7 @@ export const emailService = {
     // En production, envoyez un vrai email ici
     console.log(`
       À: ${email}
-      Sujet: Réinitialisation de votre mot de passe ImmoFrance
+      Sujet: Réinitialisation de votre mot de passe KeyHome24
       
       Bonjour,
       
@@ -58,7 +58,7 @@ export const emailService = {
       
       Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
       
-      L'équipe ImmoFrance
+      L'équipe KeyHome24
     `);
   },
 

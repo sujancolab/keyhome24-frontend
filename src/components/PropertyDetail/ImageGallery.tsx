@@ -1,76 +1,179 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
 
 interface ImageGalleryProps {
   images: string[];
-  currentImageIndex: number;
-  onPrevImage: () => void;
-  onNextImage: () => void;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({
-  images,
-  currentImageIndex,
-  onPrevImage,
-  onNextImage,
-}) => {
-  if (!images || images.length === 0) {
-    return (
-      <div className="relative h-[500px] mb-8 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-500">Aucune image disponible</p>
-      </div>
-    );
-  }
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0]));
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Préchargement des images
+  useEffect(() => {
+    const preloadImages = () => {
+      images.forEach((src, index) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          setLoadedImages(prev => new Set([...prev, index]));
+        };
+      });
+    };
+    preloadImages();
+  }, [images]);
+
+  const nextImage = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+    setTimeout(() => setIsTransitioning(false), 300);
+  }, [images.length, isTransitioning]);
+
+  const prevImage = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+    setTimeout(() => setIsTransitioning(false), 300);
+  }, [images.length, isTransitioning]);
+
+  // Gestion des touches clavier
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isFullscreen) {
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'ArrowLeft') prevImage();
+        if (e.key === 'Escape') setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen, nextImage, prevImage]);
+
+  // Empêcher le défilement quand en plein écran
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFullscreen]);
+
+  if (!images.length) return null;
 
   return (
-    <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] mb-8 rounded-lg overflow-hidden group">
-      {/* Image principale */}
-      <img
-        src={images[currentImageIndex]}
-        alt={`Image ${currentImageIndex + 1}`}
-        className="w-full h-full object-cover"
-      />
+    <>
+      <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg overflow-hidden group">
+        {/* Image principale */}
+        <div className="absolute inset-0 bg-gray-200 transition-opacity duration-300" />
+        <img
+          src={images[currentImageIndex]}
+          alt={`Photo ${currentImageIndex + 1}`}
+          className={`w-full h-full object-cover cursor-pointer transition-opacity duration-300 ${
+            loadedImages.has(currentImageIndex) ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setIsFullscreen(true)}
+        />
 
-      {/* Boutons de navigation */}
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={onPrevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            onClick={onNextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        </>
-      )}
+        {/* Contrôles de navigation */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                prevImage();
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              disabled={isTransitioning}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              disabled={isTransitioning}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </>
+        )}
 
-      {/* Indicateur de position */}
-      {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-          {images.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Compteur d'images */}
-      {images.length > 1 && (
-        <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+        {/* Compteur et bouton plein écran */}
+        <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
           {currentImageIndex + 1} / {images.length}
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFullscreen(true);
+          }}
+          className="absolute bottom-4 right-4 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+        >
+          <Maximize2 className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Mode plein écran */}
+      {isFullscreen && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
+          onClick={() => setIsFullscreen(false)}
+        >
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+          >
+            <X className="h-8 w-8" />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevImage();
+            }}
+            className="absolute left-4 text-white hover:text-gray-300"
+            disabled={isTransitioning}
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </button>
+
+          <img
+            src={images[currentImageIndex]}
+            alt={`Photo ${currentImageIndex + 1}`}
+            className={`max-h-[90vh] max-w-[90vw] object-contain transition-opacity duration-300 ${
+              loadedImages.has(currentImageIndex) ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nextImage();
+            }}
+            className="absolute right-4 text-white hover:text-gray-300"
+            disabled={isTransitioning}
+          >
+            <ChevronRight className="h-8 w-8" />
+          </button>
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white">
+            {currentImageIndex + 1} / {images.length}
+          </div>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
-export default ImageGallery;
+export default React.memo(ImageGallery);

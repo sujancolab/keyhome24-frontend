@@ -3,14 +3,20 @@ import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { SearchRequestData } from '../../../types/searchRequest';
 import { MapPin, Building2, BedDouble } from 'lucide-react';
 import ChfIcon from '../../ChfIcon';
-import { cantons } from '../../../data/cantons';
 
 interface LocationFormProps {
   register: UseFormRegister<SearchRequestData>;
   errors: FieldErrors<SearchRequestData>;
+  validatePostalCode: (value: string) => true | string;
+  validateBudget: (value: number) => true | string;
 }
 
-const LocationForm: React.FC<LocationFormProps> = ({ register, errors }) => {
+const LocationForm: React.FC<LocationFormProps> = ({ 
+  register, 
+  errors,
+  validatePostalCode,
+  validateBudget
+}) => {
   return (
     <div className="space-y-6">
       {/* Titre */}
@@ -31,38 +37,14 @@ const LocationForm: React.FC<LocationFormProps> = ({ register, errors }) => {
       {/* Localisation */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-gray-700">Localisation *</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Canton *</label>
-            <div className="input-group">
-              <select
-                {...register('location.canton', { required: "Le canton est requis" })}
-                className="form-select input-with-icon"
-              >
-                <option value="">Sélectionnez</option>
-                {cantons.map(canton => (
-                  <option key={canton.code} value={canton.code}>
-                    {canton.name}
-                  </option>
-                ))}
-              </select>
-              <MapPin className="input-icon" />
-            </div>
-            {errors.location?.canton && (
-              <p className="form-error">{errors.location.canton.message}</p>
-            )}
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-600 mb-1">NPA *</label>
             <input
               type="text"
               {...register('location.npa', { 
                 required: "Le NPA est requis",
-                pattern: {
-                  value: /^\d{4}$/,
-                  message: "Le NPA doit contenir 4 chiffres"
-                }
+                validate: validatePostalCode
               })}
               className="form-input"
               placeholder="1000"
@@ -95,7 +77,7 @@ const LocationForm: React.FC<LocationFormProps> = ({ register, errors }) => {
             type="number"
             {...register('budget', { 
               required: "Le budget est requis",
-              min: { value: 100, message: "Le budget minimum est de 100 CHF" }
+              validate: validateBudget
             })}
             className="form-input input-with-icon"
             placeholder="Budget en CHF"
@@ -103,48 +85,6 @@ const LocationForm: React.FC<LocationFormProps> = ({ register, errors }) => {
           <ChfIcon className="input-icon" />
         </div>
         {errors.budget && <p className="form-error">{errors.budget.message}</p>}
-      </div>
-
-      {/* Type de bien */}
-      <div className="form-group">
-        <label className="form-label">Type de bien *</label>
-        <div className="input-group">
-          <select
-            {...register('propertyType', { required: "Le type de bien est requis" })}
-            className="form-select input-with-icon"
-          >
-            <option value="">Sélectionnez</option>
-            <option value="apartment">Appartement</option>
-            <option value="house">Maison</option>
-            <option value="villa">Villa</option>
-            <option value="studio">Studio</option>
-            <option value="loft">Loft</option>
-          </select>
-          <Building2 className="input-icon" />
-        </div>
-        {errors.propertyType && (
-          <p className="form-error">{errors.propertyType.message}</p>
-        )}
-      </div>
-
-      {/* Nombre de pièces */}
-      <div className="form-group">
-        <label className="form-label">Nombre de pièces *</label>
-        <div className="input-group">
-          <select
-            {...register('rooms', { required: "Le nombre de pièces est requis" })}
-            className="form-select input-with-icon"
-          >
-            <option value="">Sélectionnez</option>
-            <option value="1-1.5">1 - 1.5 pièces</option>
-            <option value="2-2.5">2 - 2.5 pièces</option>
-            <option value="3-3.5">3 - 3.5 pièces</option>
-            <option value="4-4.5">4 - 4.5 pièces</option>
-            <option value="5+">5 pièces et plus</option>
-          </select>
-          <BedDouble className="input-icon" />
-        </div>
-        {errors.rooms && <p className="form-error">{errors.rooms.message}</p>}
       </div>
 
       {/* Description */}
@@ -160,6 +100,82 @@ const LocationForm: React.FC<LocationFormProps> = ({ register, errors }) => {
           placeholder="Décrivez vos critères de recherche, vos préférences..."
         />
         {errors.description && <p className="form-error">{errors.description.message}</p>}
+      </div>
+
+      {/* Contact */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-700">Informations de contact *</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Nom complet *</label>
+            <input
+              type="text"
+              {...register('contact.name', { required: "Le nom est requis" })}
+              className="form-input"
+              placeholder="Jean Dupont"
+            />
+            {errors.contact?.name && (
+              <p className="form-error">{errors.contact.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Email *</label>
+            <input
+              type="email"
+              {...register('contact.email', { 
+                required: "L'email est requis",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Adresse email invalide"
+                }
+              })}
+              className="form-input"
+              placeholder="jean.dupont@example.com"
+            />
+            {errors.contact?.email && (
+              <p className="form-error">{errors.contact.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Téléphone *</label>
+            <input
+              type="tel"
+              {...register('contact.phone', { 
+                required: "Le téléphone est requis",
+                pattern: {
+                  value: /^\+?[0-9\s-]{10,}$/,
+                  message: "Numéro de téléphone invalide"
+                }
+              })}
+              className="form-input"
+              placeholder="+41 XX XXX XX XX"
+            />
+            {errors.contact?.phone && (
+              <p className="form-error">{errors.contact.phone.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Conditions générales */}
+      <div className="form-group">
+        <label className="flex items-start space-x-3">
+          <input
+            type="checkbox"
+            {...register('termsAccepted', { 
+              required: "Vous devez accepter les conditions générales" 
+            })}
+            className="mt-1 form-checkbox"
+          />
+          <span className="text-sm text-gray-600">
+            J'accepte les conditions générales et la politique de confidentialité *
+          </span>
+        </label>
+        {errors.termsAccepted && (
+          <p className="form-error">{errors.termsAccepted.message}</p>
+        )}
       </div>
     </div>
   );

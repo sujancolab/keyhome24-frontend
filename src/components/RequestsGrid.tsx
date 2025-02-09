@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import { MapPin, Calendar, Users, Key, Home, Mail, Phone, Share2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import ChfIcon from './ChfIcon';
-import { requests } from '../data/requests';
+import { requests as sampleRequests } from '../data/requests';
 
 interface RequestsGridProps {
   filters?: {
@@ -17,15 +15,14 @@ interface RequestsGridProps {
 const RequestsGrid: React.FC<RequestsGridProps> = ({ filters, theme = 'blue' }) => {
   const [sortBy, setSortBy] = useState('newest');
 
-  const filterRequests = () => {
-    let filteredRequests = [...requests];
+  const filteredRequests = useMemo(() => {
+    let filteredRequests = [...sampleRequests];
 
     if (filters) {
       if (filters.location) {
         const searchTerm = filters.location.toLowerCase();
         filteredRequests = filteredRequests.filter(r => 
           r.location.city.toLowerCase().includes(searchTerm) ||
-          r.location.canton.toLowerCase().includes(searchTerm) ||
           r.location.npa.includes(searchTerm)
         );
       }
@@ -49,54 +46,52 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({ filters, theme = 'blue' }) 
       }
     }
 
-    // Tri
-    switch (sortBy) {
-      case 'budget-asc':
-        return filteredRequests.sort((a, b) => parseInt(a.budget) - parseInt(b.budget));
-      case 'budget-desc':
-        return filteredRequests.sort((a, b) => parseInt(b.budget) - parseInt(a.budget));
-      case 'newest':
-        return filteredRequests.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      default:
-        return filteredRequests;
-    }
-  };
-
-  const getRequestTypeIcon = (type: string) => {
-    switch (type) {
-      case 'colocation':
-        return <Users className="h-5 w-5" />;
-      case 'reprise':
-        return <Key className="h-5 w-5" />;
-      default:
-        return <Home className="h-5 w-5" />;
-    }
-  };
+    return filteredRequests.sort((a, b) => {
+      switch (sortBy) {
+        case 'price-asc':
+          return parseInt(a.budget) - parseInt(b.budget);
+        case 'price-desc':
+          return parseInt(b.budget) - parseInt(a.budget);
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        default:
+          return 0;
+      }
+    });
+  }, [filters, sortBy]);
 
   const handleShare = async (request: any) => {
     try {
       await navigator.share({
         title: request.title,
-        text: `${request.description}\nLocalisation: ${request.location.city}, ${request.location.canton}\nBudget: ${request.budget} CHF/mois`,
+        text: `${request.description}\nLocalisation: ${request.location.city}\nBudget: ${request.budget} CHF/mois`,
         url: window.location.href
       });
     } catch (error) {
-      // Fallback pour copier le lien
       await navigator.clipboard.writeText(window.location.href);
       alert('Lien copié dans le presse-papier !');
     }
   };
 
-  const displayedRequests = filterRequests();
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'location':
+        return 'Location';
+      case 'colocation':
+        return 'Colocation';
+      case 'reprise':
+        return 'Reprise de bail';
+      default:
+        return type;
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm sticky top-0 z-10">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm sticky top-16 z-10">
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 text-center sm:text-left">
-            {displayedRequests.length} Demande{displayedRequests.length > 1 ? 's' : ''} de recherche
+            {filteredRequests.length} Demande{filteredRequests.length > 1 ? 's' : ''} de recherche
           </h2>
         </div>
         
@@ -107,94 +102,80 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({ filters, theme = 'blue' }) 
             className="w-full sm:w-auto px-4 py-2 bg-gray-100 rounded-lg appearance-none cursor-pointer hover:bg-gray-200 transition-colors pr-8"
           >
             <option value="newest">Plus récent</option>
-            <option value="budget-asc">Budget croissant</option>
-            <option value="budget-desc">Budget décroissant</option>
+            <option value="price-asc">Budget croissant</option>
+            <option value="price-desc">Budget décroissant</option>
           </select>
         </div>
       </div>
 
-      <div className="grid gap-6">
-        {displayedRequests.map((request) => (
-          <div 
-            key={request.id}
-            className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-          >
-            <div className="flex flex-col md:flex-row justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-                  <div>
+      <div className="grid gap-4">
+        {filteredRequests.map((request) => (
+          <div key={request.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+            <div className="space-y-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">{request.title}</h3>
-                    <div className="flex items-center text-gray-600 mt-1">
-                      <MapPin className="h-5 w-5 mr-2" />
-                      <span>{request.location.city}, {request.location.canton}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-blue-600 font-semibold">
-                    <ChfIcon className="h-5 w-5 mr-1" />
-                    <span>{request.budget} /mois</span>
-                  </div>
-                </div>
-
-                <p className="text-gray-700 mb-4 line-clamp-2">{request.description}</p>
-
-                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    <span>Dès le {new Date(request.moveInDate).toLocaleDateString('fr-CH')}</span>
-                  </div>
-                  <div className="flex items-center">
-                    {getRequestTypeIcon(request.type)}
-                    <span className="ml-1">
-                      {request.type === 'colocation' ? 'Colocation' : 
-                       request.type === 'reprise' ? 'Reprise de bail' : 'Location'}
+                    <span className={`px-3 py-1 text-sm rounded-full ${
+                      request.status === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {request.status === 'active' ? 'Active' : 'En attente'}
                     </span>
                   </div>
+
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-600 mb-4">
+                    <span>{request.location.city}</span>
+                    <span>{request.budget} CHF/mois</span>
+                    <span>{getTypeLabel(request.type)}</span>
+                    <span>Dès le {new Date(request.moveInDate).toLocaleDateString('fr-CH')}</span>
+                  </div>
+
+                  <p className="text-gray-700">{request.description}</p>
                 </div>
               </div>
 
-              <div className="flex sm:flex-col gap-2">
+              <div className="flex flex-wrap gap-3 pt-4 border-t">
                 <a
                   href={`tel:${request.contact.phone}`}
-                  className={`flex-1 sm:w-auto px-4 py-2 ${
+                  className={`px-4 py-2 rounded-lg transition-colors ${
                     theme === 'blue' 
                       ? 'bg-blue-600 text-white hover:bg-blue-700' 
                       : 'bg-red-600 text-white hover:bg-red-700'
-                  } rounded-lg transition-colors flex items-center justify-center`}
+                  }`}
                 >
-                  <Phone className="h-4 w-4 mr-2" />
                   Appeler
                 </a>
                 <a
                   href={`mailto:${request.contact.email}`}
-                  className={`flex-1 sm:w-auto px-4 py-2 border ${
+                  className={`px-4 py-2 rounded-lg transition-colors ${
                     theme === 'blue'
-                      ? 'border-blue-600 text-blue-600 hover:bg-blue-50'
-                      : 'border-red-600 text-red-600 hover:bg-red-50'
-                  } rounded-lg transition-colors flex items-center justify-center`}
+                      ? 'border border-blue-600 text-blue-600 hover:bg-blue-50'
+                      : 'border border-red-600 text-red-600 hover:bg-red-50'
+                  }`}
                 >
-                  <Mail className="h-4 w-4 mr-2" />
                   Email
                 </a>
                 <button
                   onClick={() => handleShare(request)}
-                  className="flex-1 sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors flex items-center justify-center"
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
                   Partager
                 </button>
               </div>
             </div>
           </div>
         ))}
-
-        {displayedRequests.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg">
-            <p className="text-gray-600">
-              Aucune demande ne correspond à vos critères
-            </p>
-          </div>
-        )}
       </div>
+
+      {filteredRequests.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-lg">
+          <p className="text-gray-600">
+            Aucune demande ne correspond à vos critères
+          </p>
+        </div>
+      )}
     </div>
   );
 };

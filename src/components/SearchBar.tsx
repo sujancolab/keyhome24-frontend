@@ -1,228 +1,195 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, MapPin, Home, ArrowDown, BedDouble } from "lucide-react";
-import ChfIcon from "./ChfIcon";
-import { useQuery } from "@tanstack/react-query";
-import Backend from "../services/backend";
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Home, ArrowDown } from 'lucide-react';
+import ChfIcon from './ChfIcon';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { propertyCategories, propertyTypes } from '../types/propertyListing';
 
 interface SearchBarProps {
-    onSearchTypeChange: (type: "sell" | "rent") => void;
-    onFilterChange: (filters: {
-        location: string;
-        priceMax?: number;
-        propertyType: string;
-        rooms?: number;
-    }) => void;
-    searchType: "sell" | "rent";
-    currentFilters: {
-        location: string;
-        priceMax?: number;
-        propertyType: string;
-        rooms?: number;
-    };
+  onSearchTypeChange: (type: 'buy' | 'rent') => void;
+  onFilterChange: (filters: any) => void;
+  searchType: 'buy' | 'rent';
+  currentFilters: any;
 }
 
-const propertyTypes = [
-    { value: "apartment", label: "Appartement" },
-    { value: "house", label: "Maison" },
-    { value: "villa", label: "Villa" },
-    { value: "chalet", label: "Chalet" },
-    { value: "loft", label: "Loft" },
-    { value: "studio", label: "Studio" },
-    { value: "duplex", label: "Duplex" },
-    { value: "penthouse", label: "Penthouse" },
-    { value: "office", label: "Bureau" },
-    { value: "shop", label: "Commerce" },
-    { value: "restaurant", label: "Restaurant" },
-    { value: "warehouse", label: "Entrepôt" },
-    { value: "industrial", label: "Local industriel" },
-    { value: "hotel", label: "Hôtel" },
-    { value: "buildingLand", label: "Terrain à bâtir" },
-    { value: "agriculturalLand", label: "Terrain agricole" },
-    { value: "industrialLand", label: "Terrain industriel" },
-    { value: "indoorParking", label: "Place intérieure" },
-    { value: "outdoorParking", label: "Place extérieure" },
-    { value: "garage", label: "Garage individuel" },
-    { value: "carport", label: "Carport" },
-];
-
 const SearchBar: React.FC<SearchBarProps> = ({
-    onSearchTypeChange,
-    onFilterChange,
-    searchType,
-    currentFilters,
+  onSearchTypeChange,
+  onFilterChange,
+  searchType,
+  currentFilters
 }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [location_, setLocation] = useState(currentFilters.location || '');
+  const [propertyType, setPropertyType] = useState(currentFilters.propertyType || '');
+  const [priceMax, setPriceMax] = useState(currentFilters.priceMax?.toString() || '');
+  const [rooms, setRooms] = useState(currentFilters.rooms?.toString() || '');
 
-    const { isLoading, data } = useQuery({
-        queryKey: ["annonceData"],
-        queryFn: () => Backend.get("/annonces"),
-    });
+  useEffect(() => {
+    const filters = {
+      location: location_,
+      propertyType,
+      priceMax: priceMax ? parseInt(priceMax) : undefined,
+      rooms: rooms ? parseFloat(rooms) : undefined
+    };
+    onFilterChange(filters);
 
-    const [location, setLocation] = useState(currentFilters.location);
-    const [priceMax, setPriceMax] = useState(
-        currentFilters.priceMax?.toString() || ""
-    );
-    const [propertyType, setPropertyType] = useState(
-        currentFilters.propertyType
-    );
-    const [rooms, setRooms] = useState(currentFilters.rooms?.toString() || "");
+    const searchParams = new URLSearchParams();
+    searchParams.set('type', searchType);
+    if (location_) searchParams.set('location', location_);
+    if (priceMax) searchParams.set('priceMax', priceMax);
+    if (propertyType) searchParams.set('propertyType', propertyType);
+    if (rooms) searchParams.set('rooms', rooms);
 
-    if (isLoading && !data) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-            </div>
-        );
+    localStorage.setItem('propertySearchFilters', JSON.stringify({
+      searchType,
+      ...filters
+    }));
+
+    if (!location.pathname.includes('/properties')) {
+      navigate(`/properties?${searchParams.toString()}`);
+    } else {
+      window.history.replaceState(null, '', `?${searchParams.toString()}`);
     }
+  }, [searchType, location_, propertyType, priceMax, rooms]);
 
-    const uniqueRooms = Array.from(
-        new Set(
-            !isLoading && data && data.length > 0 &&
-                data
-                    .filter((p) => p.transactionType === searchType)
-                    .map((p) => p.rooms)
-        )
-    ).sort((a, b) => a - b);
+  const getPriceOptions = () => {
+    if (searchType === 'rent') {
+      return [
+        { value: "1000", label: "Jusqu'à 1'000 CHF/mois" },
+        { value: "2000", label: "Jusqu'à 2'000 CHF/mois" },
+        { value: "3000", label: "Jusqu'à 3'000 CHF/mois" },
+        { value: "4000", label: "Jusqu'à 4'000 CHF/mois" },
+        { value: "5000", label: "Jusqu'à 5'000 CHF/mois" },
+        { value: "6000", label: "Jusqu'à 6'000 CHF/mois" },
+        { value: "7000", label: "Jusqu'à 7'000 CHF/mois" },
+        { value: "8000", label: "Jusqu'à 8'000 CHF/mois" },
+        { value: "9000", label: "Jusqu'à 9'000 CHF/mois" },
+        { value: "10000", label: "Jusqu'à 10'000 CHF/mois" },
+        { value: "10001", label: "Plus de 10'000 CHF/mois" }
+      ];
+    } else {
+      return [
+        { value: "500000", label: "Jusqu'à 500'000 CHF" },
+        { value: "1000000", label: "Jusqu'à 1'000'000 CHF" },
+        { value: "1500000", label: "Jusqu'à 1'500'000 CHF" },
+        { value: "2000000", label: "Jusqu'à 2'000'000 CHF" },
+        { value: "2500000", label: "Jusqu'à 2'500'000 CHF" },
+        { value: "3000000", label: "Jusqu'à 3'000'000 CHF" },
+        { value: "4000000", label: "Jusqu'à 4'000'000 CHF" },
+        { value: "5000000", label: "Jusqu'à 5'000'000 CHF" },
+        { value: "6000000", label: "Jusqu'à 6'000'000 CHF" },
+        { value: "7000000", label: "Jusqu'à 7'000'000 CHF" },
+        { value: "8000000", label: "Jusqu'à 8'000'000 CHF" },
+        { value: "9000000", label: "Jusqu'à 9'000'000 CHF" },
+        { value: "10000000", label: "Jusqu'à 10'000'000 CHF" },
+        { value: "10000001", label: "Plus de 10'000'000 CHF" }
+      ];
+    }
+  };
 
-    const generatePriceRanges = () => {
-        const maxPrice = searchType === "sell" ? 5000000 : 10000;
-        const step = searchType === "sell" ? 500000 : 1000;
-        const ranges = [];
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-4">
+      {/* Type de recherche */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <button
+          onClick={() => onSearchTypeChange('buy')}
+          className={`py-2 rounded-lg font-medium transition-colors ${
+            searchType === 'buy'
+              ? 'bg-red-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Acheter
+        </button>
+        <button
+          onClick={() => onSearchTypeChange('rent')}
+          className={`py-2 rounded-lg font-medium transition-colors ${
+            searchType === 'rent'
+              ? 'bg-red-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Louer
+        </button>
+      </div>
 
-        for (let price = step; price <= maxPrice; price += step) {
-            ranges.push({
-                label: `Jusqu'à ${new Intl.NumberFormat("fr-CH").format(
-                    price
-                )} CHF${searchType === "rent" ? "/mois" : ""}`,
-                value: price,
-            });
-        }
+      {/* Barre de recherche */}
+      <div className="relative flex flex-col lg:flex-row gap-3">
+        {/* Groupe principal (localisation + type) */}
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Ville ou code postal"
+              value={location_}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border focus:ring-2 focus:ring-red-500"
+            />
+            <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+          </div>
 
-        return ranges;
-    };
-
-    const handleSearch = () => {
-        const filters = {
-            location,
-            priceMax: priceMax ? parseInt(priceMax) : undefined,
-            propertyType,
-            rooms: rooms ? parseFloat(rooms) : undefined,
-        };
-
-        onFilterChange(filters);
-
-        const searchParams = new URLSearchParams();
-        searchParams.set("type", searchType);
-        if (location) searchParams.set("location", location);
-        if (priceMax) searchParams.set("priceMax", priceMax);
-        if (propertyType) searchParams.set("propertyType", propertyType);
-        if (rooms) searchParams.set("rooms", rooms);
-
-        navigate(`/properties?${searchParams.toString()}`);
-    };
-
-    return (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-xl shadow-lg p-4">
-                <div className="flex gap-2 mb-4">
-                    <button
-                        className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-medium transition-all ${
-                            searchType === "sell"
-                                ? "bg-red-600 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                        onClick={() => onSearchTypeChange("sell")}
-                    >
-                        Acheter
-                    </button>
-                    <button
-                        className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-medium transition-all ${
-                            searchType === "rent"
-                                ? "bg-red-600 text-white"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                        onClick={() => onSearchTypeChange("rent")}
-                    >
-                        Louer
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
-                    <div className="lg:col-span-3 relative">
-                        <input
-                            type="text"
-                            placeholder="Canton, ville ou code postal"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500"
-                        />
-                        <MapPin className="absolute left-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                    </div>
-
-                    <div className="lg:col-span-3 relative">
-                        <select
-                            value={priceMax}
-                            onChange={(e) => setPriceMax(e.target.value)}
-                            className="w-full pl-10 pr-8 py-2 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 appearance-none"
-                        >
-                            <option value="">Prix en CHF</option>
-                            {generatePriceRanges().map((range) => (
-                                <option key={range.value} value={range.value}>
-                                    {range.label}
-                                </option>
-                            ))}
-                        </select>
-                        <ChfIcon className="absolute left-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                        <ArrowDown className="absolute right-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                    </div>
-
-                    <div className="lg:col-span-3 relative">
-                        <select
-                            value={propertyType}
-                            onChange={(e) => setPropertyType(e.target.value)}
-                            className="w-full pl-10 pr-8 py-2 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 appearance-none"
-                        >
-                            <option value="">Type de bien</option>
-                            {propertyTypes.map((type) => (
-                                <option key={type.value} value={type.value}>
-                                    {type.label}
-                                </option>
-                            ))}
-                        </select>
-                        <Home className="absolute left-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                        <ArrowDown className="absolute right-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                    </div>
-
-                    <div className="lg:col-span-2 relative">
-                        <select
-                            value={rooms}
-                            onChange={(e) => setRooms(e.target.value)}
-                            className="w-full pl-10 pr-8 py-2 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 appearance-none"
-                        >
-                            <option value="">Pièces</option>
-                            {uniqueRooms.map((room) => (
-                                <option key={room} value={room}>
-                                    {room} pièces
-                                </option>
-                            ))}
-                        </select>
-                        <BedDouble className="absolute left-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                        <ArrowDown className="absolute right-3 top-2.5 sm:top-3.5 h-5 w-5 text-gray-400" />
-                    </div>
-
-                    <div className="lg:col-span-1">
-                        <button
-                            onClick={handleSearch}
-                            className="w-full bg-red-600 text-white h-full min-h-[2.5rem] sm:min-h-[2.75rem] px-4 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
-                        >
-                            <Search className="h-5 w-5" />
-                        </button>
-                    </div>
-                </div>
-            </div>
+          <div className="relative">
+            <select
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+              className="w-full pl-10 pr-8 py-3 rounded-lg border appearance-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="">Type de bien</option>
+              {propertyCategories.map((category) => (
+                <optgroup key={category.id} label={category.label}>
+                  {category.types.map((type) => (
+                    <option key={type} value={type.toLowerCase()}>
+                      {propertyTypes[type]?.label || type}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <Home className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+            <ArrowDown className="absolute right-3 top-3.5 h-5 w-5 text-gray-400" />
+          </div>
         </div>
-    );
+
+        {/* Groupe secondaire (prix + pièces) */}
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="relative">
+            <select
+              value={priceMax}
+              onChange={(e) => setPriceMax(e.target.value)}
+              className="w-full pl-10 pr-8 py-3 rounded-lg border appearance-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="">Budget max.</option>
+              {getPriceOptions().map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <ChfIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+            <ArrowDown className="absolute right-3 top-3.5 h-5 w-5 text-gray-400" />
+          </div>
+
+          <div className="relative">
+            <select
+              value={rooms}
+              onChange={(e) => setRooms(e.target.value)}
+              className="w-full pl-10 pr-8 py-3 rounded-lg border appearance-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="">Pièces</option>
+              <option value="1">1 - 1.5 pièces</option>
+              <option value="2">2 - 2.5 pièces</option>
+              <option value="3">3 - 3.5 pièces</option>
+              <option value="4">4 - 4.5 pièces</option>
+              <option value="5">5 - 5.5 pièces</option>
+              <option value="6">6+ pièces</option>
+            </select>
+            <Home className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+            <ArrowDown className="absolute right-3 top-3.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default SearchBar;
