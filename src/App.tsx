@@ -15,7 +15,7 @@ import PrivateRoute from './components/PrivateRoute';
 import TermsPage from './pages/LegalPages/TermsPage';
 import PrivacyPage from './pages/LegalPages/PrivacyPage';
 import ImprintPage from './pages/LegalPages/ImprintPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
+// import VerifyEmailPage from './pages/VerifyEmailPage';
 
 const App: React.FC = () => {
   return (
@@ -31,7 +31,7 @@ const App: React.FC = () => {
               <Route path="/property/:id" element={<PropertyDetailPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              {/* <Route path="/verify-email" element={<VerifyEmailPage />} /> */}
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/imprint" element={<ImprintPage />} />
