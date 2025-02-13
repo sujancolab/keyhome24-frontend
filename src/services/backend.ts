@@ -4,7 +4,7 @@ class Backend {
     private static baseUrl: string =
         window.location.hostname === "localhost"
             ? "http://localhost:8081/api/v1"
-            : "http://137.184.83.246/api/v1";//"https://api.keyhome24.com/api/v1";
+            :"https://api.keyhome24.com/api/v1";
 
     private static async fetchWithFallback(endpoint: string, options: RequestInit) {
         try {
