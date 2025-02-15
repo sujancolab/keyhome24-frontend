@@ -62,13 +62,13 @@ export const Navbar = () => {
                                         <Building className="h-5 w-5 mr-1" />
                                         Propriétés
                                     </Link>
-                                    {/*<Link
+                                    <Link
                                         to="/requests"
                                         className="text-white hover:text-red-500 flex items-center transition-colors"
                                     >
                                         <Search className="h-5 w-5 mr-1" />
                                         Demandes
-                                    </Link>*/}
+                                    </Link>
                                 </>
                             )}
                             {user ? (
@@ -124,13 +124,13 @@ export const Navbar = () => {
                                     <Building className="h-5 w-5 mr-3 text-red-500" />
                                     Propriétés
                                 </Link>
-                                {/*<Link
+                                <Link
                                     to="/requests"
                                     className="flex items-center p-3 hover:bg-dark-700 rounded-lg text-white"
                                 >
                                     <Search className="h-5 w-5 mr-3 text-red-500" />
                                     Demandes
-                                </Link>*/}
+                                </Link>
                             </>
                         )}
                         {user ? (

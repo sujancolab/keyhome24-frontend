@@ -5,11 +5,22 @@ import { useQuery } from "@tanstack/react-query";
 import Backend from "../services/backend";
 
 export const Footer = () => {
-    const { isLoading: configurationIsLoading, data: configurationData } =
-        useQuery({
-            queryKey: ["configurationData"],
-            queryFn: () => Backend.get("/configuration"),
-        });
+    const { 
+        isLoading: configurationIsLoading, 
+        data: configurationData,
+        error: configurationError,
+        isError: configurationIsError
+    } = useQuery({
+        queryKey: ["configurationData"],
+        queryFn: () => Backend.get("/configuration"),
+        retry: 3, // Retry up to 3 times on failure
+        staleTime: 60 * 1000 // 1 minute cache
+    });
+
+    // Fallback values if API fails
+    const siteName = (!configurationIsLoading && configurationData?.name) ?? 'Notre Plateforme';
+    const siteDescription = (!configurationIsLoading && configurationData?.description) ?? 'Plateforme de recherche collaborative';
+    const siteEmail = (!configurationIsLoading && configurationData?.email) ?? 'contact@example.com';
 
     return (
         <footer className="bg-dark-900 text-white">
@@ -19,11 +30,11 @@ export const Footer = () => {
                         <Link to="/" className="flex items-center mb-4">
                             <Home className="h-6 sm:h-8 w-6 sm:w-8 text-red-500" />
                             <span className="ml-2 text-lg sm:text-xl font-bold">
-                                {!configurationIsLoading && configurationData?.name || ''}
+                                {siteName}
                             </span>
                         </Link>
                         <p className="text-sm sm:text-base text-gray-400">
-                            {!configurationIsLoading && configurationData?.description || ''}
+                            {siteDescription}
                         </p>
                     </div>
 
@@ -33,14 +44,12 @@ export const Footer = () => {
                         </h3>
                         <div className="space-y-2">
                             <a
-                                href={
-                                    !configurationIsLoading && configurationData?.email ? `mailto:${configurationData?.email}` : "#"
-                                }
+                                href={configurationIsError ? '#' : `mailto:${siteEmail}`}
                                 className="flex items-center text-sm sm:text-base hover:text-red-500"
                             >
                                 <Mail className="h-5 w-5 mr-2 text-red-500" />
                                 <span>
-                                    {!configurationIsLoading && configurationData?.email || ''}
+                                    {configurationIsError ? 'Contact non disponible' : siteEmail}
                                 </span>
                             </a>
                         </div>
@@ -111,8 +120,7 @@ export const Footer = () => {
 
                 <div className="border-t border-dark-800 mt-8 pt-8 text-center">
                     <p className="text-sm text-gray-400">
-                        &copy; 2024{" "}
-                        {!configurationIsLoading && configurationData?.name || ''}.
+                        &copy; 2024 {siteName}.
                         Tous droits réservés.
                     </p>
                 </div>
